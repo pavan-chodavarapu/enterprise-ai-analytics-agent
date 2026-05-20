@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: fct_daily_sales
+    tests:
+      - not_null:
+          column_name: sale_date
+      - not_null:
+          column_name: region
+      - not_null:
+          column_name: net_revenue
+
+  - name: stg_sales
+    tests:
+      - not_null:
+          column_name: date_key
+      - not_null:
+          column_name: store_key

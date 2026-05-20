@@ -1,0 +1,14 @@
+.env
+*.pyc
+__pycache__/
+.pytest_cache/
+.dbt/
+dbt/profiles.yml
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+.DS_Store
+faiss_index/
+*.log
