@@ -1,8 +1,10 @@
--- Staging: raw TPCDS store_sales → clean column names
--- Source: SNOWFLAKE_SAMPLE_DATA.TPCDS_SF10TCL.STORE_SALES
+-- Staging: TPCDS STORE_SALES → clean column names
+-- SS_NET_PAID is the revenue field — use this, not SS_SALES_PRICE (excludes discounts/coupons)
+
+{{ config(materialized='view') }}
 
 WITH source AS (
-    SELECT * FROM SNOWFLAKE_SAMPLE_DATA.TPCDS_SF10TCL.STORE_SALES
+    SELECT * FROM {{ source('tpcds', 'store_sales') }}
 ),
 
 renamed AS (
@@ -14,7 +16,7 @@ renamed AS (
         SS_TICKET_NUMBER      AS ticket_number,
         SS_QUANTITY           AS quantity,
         SS_SALES_PRICE        AS unit_price,
-        SS_NET_PAID           AS net_paid,        -- use this for revenue
+        SS_NET_PAID           AS net_paid,        -- revenue after discounts — use for all revenue metrics
         SS_NET_PROFIT         AS net_profit,
         SS_COUPON_AMT         AS coupon_discount
     FROM source

@@ -1,0 +1,63 @@
+version: 2
+
+sources:
+  - name: tpcds
+    description: >
+      TPC-DS benchmark dataset (10TB scale factor) — retail sales simulation.
+      Free and available in every Snowflake account under SNOWFLAKE_SAMPLE_DATA.
+    database: SNOWFLAKE_SAMPLE_DATA
+    schema: TPCDS_SF10TCL
+    tables:
+      - name: store_sales
+        description: "Transaction-level store sales. Returns appear as negative SS_NET_PAID."
+        columns:
+          - name: SS_SOLD_DATE_SK
+            description: "FK to DATE_DIM — join to get calendar dates"
+          - name: SS_STORE_SK
+            description: "FK to STORE"
+          - name: SS_ITEM_SK
+            description: "FK to ITEM"
+          - name: SS_CUSTOMER_SK
+            description: "FK to CUSTOMER"
+          - name: SS_TICKET_NUMBER
+            description: "Transaction identifier — use COUNT(DISTINCT) for transaction counts"
+          - name: SS_NET_PAID
+            description: "Revenue after discounts — positive=sale, negative=return. Use this, not SS_SALES_PRICE."
+
+      - name: store
+        description: "Store dimension with location and size attributes"
+        columns:
+          - name: S_STORE_SK
+            description: "Primary key"
+          - name: S_STATE
+            description: "US state — used to derive region (East/West/South/Midwest)"
+
+      - name: customer
+        description: "Customer dimension"
+        columns:
+          - name: C_CUSTOMER_SK
+            description: "Primary key"
+
+      - name: date_dim
+        description: "Date dimension — maps date surrogate keys to calendar fields"
+        columns:
+          - name: D_DATE_SK
+            description: "Primary key — matches SS_SOLD_DATE_SK in store_sales"
+          - name: D_DATE
+            description: "Calendar date (DATE type)"
+          - name: D_YEAR
+            description: "4-digit year. TPCDS data covers 1998–2002."
+          - name: D_MOY
+            description: "Month of year (1–12)"
+          - name: D_QOY
+            description: "Quarter of year (1–4)"
+          - name: D_DAY_NAME
+            description: "Day name (Monday–Sunday)"
+
+      - name: item
+        description: "Product/item dimension"
+        columns:
+          - name: I_ITEM_SK
+            description: "Primary key"
+          - name: I_CATEGORY
+            description: "Product category (Books, Electronics, etc.)"

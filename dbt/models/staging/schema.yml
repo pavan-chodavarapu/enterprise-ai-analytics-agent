@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: stg_sales
+    description: "Cleaned store sales transactions from TPC-DS STORE_SALES. Returns appear as negative net_paid."
+    columns:
+      - name: ticket_number
+        description: "Transaction identifier — use COUNT(DISTINCT) not COUNT(*) for transaction counts"
+        tests:
+          - not_null
+      - name: net_paid
+        description: "Revenue after discounts — positive=sale, negative=return"
+        tests:
+          - not_null
+      - name: date_key
+        tests:
+          - not_null
+      - name: store_key
+        tests:
+          - not_null
+
+  - name: stg_stores
+    description: "Store dimension with US state → region classification (East/West/South/Midwest)"
+    columns:
+      - name: store_key
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: region
+        description: "Derived from state — must stay in sync with USER_REGION_MAP values"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['East', 'West', 'South', 'Midwest', 'Other']
+      - name: state
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: "Customer dimension from TPC-DS CUSTOMER"
+    columns:
+      - name: customer_key
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique

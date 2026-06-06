@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: fct_daily_sales
+    description: >
+      Daily sales aggregated by store and date. Primary table for agent queries.
+      RLS is enforced in the agent layer via INNER JOIN on user_region_map — not in this model.
+      TPCDS data covers years 1998–2002; use MAX(sale_year) as proxy for "current year".
+    columns:
+      - name: sale_date
+        description: "Calendar date (DATE)"
+        tests:
+          - not_null
+      - name: sale_year
+        description: "4-digit year (1998–2002 for TPCDS data)"
+        tests:
+          - not_null
+      - name: sale_month
+        description: "Month of year (1–12)"
+        tests:
+          - not_null
+      - name: sale_quarter
+        description: "Quarter of year (1–4)"
+        tests:
+          - not_null
+      - name: store_key
+        tests:
+          - not_null
+      - name: region
+        description: "Store region — the column the RLS INNER JOIN filters on"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['East', 'West', 'South', 'Midwest', 'Other']
+      - name: net_revenue
+        description: "Sum of net_paid (excludes returns since we filter net_paid > 0 in staging)"
+        tests:
+          - not_null
+      - name: transaction_count
+        tests:
+          - not_null
+      - name: avg_transaction_value
+        description: "net_revenue / transaction_count — NULL-safe (NULLIF prevents divide-by-zero)"
+
+  - name: dim_store
+    description: "Store dimension — used by the agent for store-level metadata queries"
+    columns:
+      - name: store_key
+        description: "Primary key"
+        tests:
+          - not_null
+          - unique
+      - name: region
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['East', 'West', 'South', 'Midwest', 'Other']

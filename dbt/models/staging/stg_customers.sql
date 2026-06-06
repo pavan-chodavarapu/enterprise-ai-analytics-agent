@@ -1,30 +1,20 @@
--- Staging: raw TPCDS store → clean column names with region mapping
+-- Staging: TPCDS CUSTOMER → clean column names
+
+{{ config(materialized='view') }}
 
 WITH source AS (
-    SELECT * FROM SNOWFLAKE_SAMPLE_DATA.TPCDS_SF10TCL.STORE
+    SELECT * FROM {{ source('tpcds', 'customer') }}
 ),
 
 renamed AS (
     SELECT
-        S_STORE_SK      AS store_key,
-        S_STORE_ID      AS store_id,
-        S_STORE_NAME    AS store_name,
-        S_CITY          AS city,
-        S_STATE         AS state,
-        S_COUNTRY       AS country,
-        S_FLOOR_SPACE   AS floor_space,
-        -- Region mapping (matches USER_REGION_MAP values)
-        CASE
-            WHEN S_STATE IN ('CT','DE','MA','MD','ME','NH','NJ','NY','PA','RI','VA','VT')
-                THEN 'East'
-            WHEN S_STATE IN ('AK','AZ','CA','CO','HI','ID','MT','NM','NV','OR','UT','WA','WY')
-                THEN 'West'
-            WHEN S_STATE IN ('AL','AR','FL','GA','KY','LA','MS','NC','OK','SC','TN','TX')
-                THEN 'South'
-            WHEN S_STATE IN ('IA','IL','IN','KS','MI','MN','MO','ND','NE','OH','SD','WI')
-                THEN 'Midwest'
-            ELSE 'Other'
-        END AS region
+        C_CUSTOMER_SK           AS customer_key,
+        C_CUSTOMER_ID           AS customer_id,
+        C_FIRST_NAME            AS first_name,
+        C_LAST_NAME             AS last_name,
+        C_EMAIL_ADDRESS         AS email,
+        C_BIRTH_YEAR            AS birth_year,
+        C_PREFERRED_CUST_FLAG   AS preferred_customer_flag
     FROM source
 )
 

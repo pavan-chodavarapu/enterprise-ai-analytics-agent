@@ -1,18 +1,30 @@
-version: 2
+# Generic Test: assert_no_nulls
 
-models:
-  - name: fct_daily_sales
-    tests:
-      - not_null:
-          column_name: sale_date
-      - not_null:
-          column_name: region
-      - not_null:
-          column_name: net_revenue
+dbt's built-in `not_null` generic test is used throughout this project's `schema.yml` files.
+No custom generic test is needed — this file documents why.
 
-  - name: stg_sales
-    tests:
-      - not_null:
-          column_name: date_key
-      - not_null:
-          column_name: store_key
+## How tests are run
+
+```bash
+# Run all dbt tests (schema tests + singular tests)
+cd dbt
+dbt test
+
+# Run only tests for a specific model
+dbt test --select fct_daily_sales
+
+# Run only singular tests (in dbt/tests/)
+dbt test --select test_type:singular
+```
+
+## Singular tests in this project (dbt/tests/)
+
+| File | What it checks |
+|------|---------------|
+| `assert_positive_revenue.sql` | No negative net_revenue in fct_daily_sales |
+| `assert_rls_coverage.sql` | Every region in fct_daily_sales has a user_region_map entry |
+
+## Schema tests (in model schema.yml files)
+
+`not_null`, `unique`, and `accepted_values` tests are defined inline in each model's `schema.yml`.
+Run with `dbt test` — they compile to SQL and fail if they return any rows.

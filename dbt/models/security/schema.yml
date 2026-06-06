@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: user_region_map
+    description: >
+      Access control table — maps each user_id to the regions they are permitted to see.
+      Admin users have multiple rows (one per region). This is the RLS enforcement source.
+      The agent layer performs: INNER JOIN user_region_map ON region = urm.region AND user_id = :current_user
+    columns:
+      - name: user_id
+        description: "Application user identifier — matched against CURRENT_USER_ID at query time"
+        tests:
+          - not_null
+      - name: region
+        description: "Region this user can access — must match values in fct_daily_sales.region"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['East', 'West', 'South', 'Midwest']
