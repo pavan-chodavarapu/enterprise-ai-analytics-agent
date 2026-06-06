@@ -192,15 +192,15 @@ Full reasoning in [ARCHITECTURE.md](ARCHITECTURE.md). The short version:
 
 ## Background
 
-This is a **public reconstruction** of a production system I built at Apple — an AI
-agent serving 2,000+ business users across 18 countries, with per-user row-level
-security enforced on Snowflake data.
+This is a **public reconstruction** of a production system I built at a large
+technology company — an AI agent serving 2,000+ business users across multiple
+countries, with per-user row-level security enforced on Snowflake data.
 
-That system shipped 17 versions. One version had a security regression — a user in
-one country received restricted data from another country because a WHERE-based
-filter was omitted in a specific query pattern. The INNER JOIN RLS pattern in this
-repo is the direct response to that incident. The regression suite was built to
-catch that exact class of failure before it reaches production.
+That system shipped through many versions. One version had a security regression —
+a user in one country received restricted data from another country because a
+WHERE-based filter was omitted in a specific query pattern. The INNER JOIN RLS
+pattern in this repo is the direct response to that incident. The regression suite
+was built to catch that exact class of failure before it reaches production.
 
 This repository demonstrates the same architecture on publicly available TPCDS
 benchmark data — fully reproducible on any Snowflake account.

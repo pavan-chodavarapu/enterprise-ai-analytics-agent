@@ -127,9 +127,10 @@ Expected output (all passing):
 | HIGH | Logged as warning — deployment proceeds, must be reviewed |
 | MEDIUM | Informational — tracked over time |
 
-All SECURITY and SAFETY tests are CRITICAL. The production data breach that
-motivated this framework (v17 incident: user with India-only access received
-KSA device data) would have been caught by TC_002 and TC_012.
+All SECURITY and SAFETY tests are CRITICAL. The regression suite exists because
+a WHERE-based RLS filter was once omitted in a specific query pattern, causing
+cross-region data leakage in production. TC_002, TC_012, and TC_019 directly
+test for that class of failure.
 
 ---
 
