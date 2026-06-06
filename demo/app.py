@@ -10,10 +10,13 @@ st.set_page_config(
     layout="wide",
 )
 
-# ── Sidebar: user selection ───────────────────────────────────────────────────
+# ── Sidebar: user selection + RLS info ───────────────────────────────────────
 with st.sidebar:
     st.title("🔒 Access Control Demo")
-    st.markdown("Select a user to see how RLS filters data per identity.")
+    st.markdown(
+        "Select a user to see row-level security in action. "
+        "The agent enforces data access automatically — it cannot be bypassed."
+    )
 
     user = st.selectbox(
         "Login as:",
@@ -21,40 +24,49 @@ with st.sidebar:
         help="alice=East only | bob=West only | admin=All regions",
     )
 
-    st.markdown(f"""
-    **Access for `{user}`:**
-    - `alice` → East region only
-    - `bob`   → West region only
-    - `admin` → All regions
-    """)
+    region_map = {
+        "alice": ("East", "🟦"),
+        "bob":   ("West", "🟩"),
+        "admin": ("All regions", "🟨"),
+    }
+    region_label, icon = region_map[user]
+
+    st.info(f"{icon} **{user}** has access to: **{region_label}**")
+    st.caption("Queries are wrapped in an INNER JOIN on the security table — not a WHERE clause. The LLM cannot bypass it.")
 
     os.environ["CURRENT_USER_ID"] = user
+
     st.divider()
-    st.caption("Row-level security is enforced automatically — the agent cannot bypass it.")
+    st.markdown("**Sample questions:**")
+    for q in [
+        "What was total revenue in 1999?",
+        "Which store had the highest sales in 2001?",
+        "Show transaction count by day of week",
+        "What is the ATV for my region?",
+        "Compare revenue in 2001 vs 2000",
+    ]:
+        st.caption(f"• {q}")
+
+    if st.button("🗑 Clear chat", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # ── Main: chat interface ──────────────────────────────────────────────────────
 st.title("📊 Enterprise Sales Analytics Agent")
-st.caption("Ask questions about sales data in plain English. Security is enforced per user.")
+st.caption(
+    "Powered by Claude + LangChain + Snowflake. "
+    "Ask questions in plain English — security enforced per user."
+)
 
-# Sample questions
-with st.expander("💡 Try these questions"):
-    st.markdown("""
-    - What was total revenue last month?
-    - Which store had the highest sales this year?
-    - Show me transaction count by day of week
-    - What is the average transaction value for my region?
-    - Compare this month's revenue to last year
-    """)
-
-# Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Render chat history
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Input
+# New input
 if prompt := st.chat_input("Ask about sales data..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -62,8 +74,13 @@ if prompt := st.chat_input("Ask about sales data..."):
 
     with st.chat_message("assistant"):
         with st.spinner("Querying data warehouse..."):
-            from agent.agent import ask
-            response = ask(prompt)
+            try:
+                from agent.agent import ask
+                # Pass prior messages as chat history for multi-turn context
+                history = st.session_state.messages[:-1]   # exclude current message
+                response = ask(prompt, chat_history=history)
+            except Exception as e:
+                response = f"❌ Agent error: {str(e)}"
         st.markdown(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
